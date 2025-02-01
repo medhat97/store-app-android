@@ -2,6 +2,6 @@
 native android jetpack compose to create a store app
 
 
-what's Done!!
+# what's Done!!
 
-# Creating bottom navigation bar
+Creating bottom navigation bar
