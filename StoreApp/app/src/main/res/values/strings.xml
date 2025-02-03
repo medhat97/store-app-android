@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">StoreApp</string>
+    <string name="scan_tab">Scan</string>
+    <string name="home_tab">Home</string>
+    <string name="inout_tab">In/out</string>
+
+
+</resources>
