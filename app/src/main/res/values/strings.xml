@@ -3,6 +3,9 @@
     <string name="scan_tab">Scan</string>
     <string name="home_tab">Home</string>
     <string name="inout_tab">In/out</string>
+    <string name="loading">Loading</string>
+    <string name="loading_failed">Failed to load</string>
 
+    loading_failed
 
 </resources>
