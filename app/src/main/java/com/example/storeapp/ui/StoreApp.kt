@@ -30,4 +30,4 @@ fun StorePreview(){
     val storeUiState = viewModel.uiState.collectAsState().value
     StoreHomeScreen(
         viewModel = viewModel,
-        storeUiState = storeUiState)}
+        storeUiState = storeUiState) }

@@ -60,7 +60,7 @@ fun StoreHomeScreen(
                 .fillMaxWidth()
         ) {
             when(storeUiState.currentTab) {
-                TabType.HOME -> HomeScreen(storeUiState = storeUiState)
+                TabType.HOME -> HomeScreen(storeUiState = storeUiState,viewModel = viewModel)
                 TabType.SCAN -> ScanScreen()
                 TabType.INOUT -> InoutScreen()
             }
@@ -71,7 +71,7 @@ fun StoreHomeScreen(
             navigationItemContentList = navigationItemContentList,
             onTabSelected = { tabType: TabType ->
                 viewModel.updateCurrentTab(tabType)
-                viewModel.getStoreData()
+                viewModel.getStoresList()
 
             },
             modifier = Modifier.fillMaxWidth()
