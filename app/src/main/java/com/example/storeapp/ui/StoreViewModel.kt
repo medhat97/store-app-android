@@ -44,6 +44,7 @@ class StoreViewModel : ViewModel() {
                 _uiState.update {
                     it.copy(
                         data = listResult,
+                        currentNameSearchList = listResult,
                         currentLoadingStatus = LoadingStatus.SUCCESS
                     )
                 }
@@ -95,6 +96,36 @@ class StoreViewModel : ViewModel() {
     }
 
 
+    fun getMovementList(){
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    currentLoadingStatus = LoadingStatus.LOADING
+                )
+            }
+
+            try {
+                val movementsList = StoreApi.retrofitService.getMovemets()
+
+                _uiState.update {
+                    it.copy(
+                        movementsData = movementsList,
+                        currentLoadingStatus = LoadingStatus.SUCCESS
+                    )
+                }
+            } catch (e: Exception) {
+
+                _uiState.update {
+                    it.copy(
+                        currentLoadingStatus = LoadingStatus.FAILED
+                    )
+                }
+            }
+        }
+    }
+
+
+
 
     fun getStoresList(){
         viewModelScope.launch {
@@ -130,7 +161,7 @@ class StoreViewModel : ViewModel() {
         }
         _uiState.update {
             it.copy(
-                data = searchResult
+                currentNameSearchList = searchResult
             )
         }
     }
@@ -139,6 +170,18 @@ class StoreViewModel : ViewModel() {
         _uiState.update {
             it.copy(
                 currentSearchName = ""
+            )
+        }
+    }
+
+    fun scanDataSearch(currentSearchName: String,totalList: List<StoreRecord>){
+
+        val searchQRRecord = (totalList.filter {
+            it.device_name.contains(currentSearchName,ignoreCase = true) })[0]
+
+        _uiState.update {
+            it.copy(
+                currentQRScanRecord = searchQRRecord
             )
         }
     }

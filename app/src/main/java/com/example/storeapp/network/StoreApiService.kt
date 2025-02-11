@@ -1,5 +1,6 @@
 package com.example.storeapp.network
 
+import com.example.storeapp.model.MovementRecord
 import com.example.storeapp.model.StoreRecord
 import com.example.storeapp.model.StoresList
 import retrofit2.Retrofit
@@ -22,6 +23,8 @@ interface StoreApiService {
     suspend fun getData(@Query("store_id") store_id: String ): List<StoreRecord>
     @GET("stores")
     suspend fun getStoreData(): List<StoresList>
+    @GET("movement")
+    suspend fun getMovemets(): List<MovementRecord>
 }
 
 object StoreApi {

@@ -61,8 +61,9 @@ fun StoreHomeScreen(
         ) {
             when(storeUiState.currentTab) {
                 TabType.HOME -> HomeScreen(storeUiState = storeUiState,viewModel = viewModel)
-                TabType.SCAN -> ScanScreen()
-                TabType.INOUT -> InoutScreen()
+                TabType.SCAN -> ScanScreen(viewModel = viewModel,storeUiState = storeUiState)
+//                TabType.INOUT -> MScreen(viewModel = viewModel, storeUiState = storeUiState)
+                TabType.INOUT -> {}
             }
         }
 
@@ -71,7 +72,12 @@ fun StoreHomeScreen(
             navigationItemContentList = navigationItemContentList,
             onTabSelected = { tabType: TabType ->
                 viewModel.updateCurrentTab(tabType)
-                viewModel.getStoresList()
+                when(storeUiState.currentTab){
+                    TabType.HOME -> viewModel.getStoresList()
+                    TabType.SCAN -> {}
+                    TabType.INOUT -> {}
+                }
+
 
             },
             modifier = Modifier.fillMaxWidth()

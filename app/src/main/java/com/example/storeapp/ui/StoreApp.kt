@@ -8,11 +8,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun StoreApp(){
-    val viewModel: StoreViewModel = viewModel()
-    val storeUiState = viewModel.uiState.collectAsState().value
-
-
+fun StoreApp(
+    storeUiState: StoreUiState,
+    viewModel: StoreViewModel){
 
     StoreHomeScreen(
         viewModel = viewModel,
