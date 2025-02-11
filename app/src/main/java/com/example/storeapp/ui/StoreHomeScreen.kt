@@ -62,8 +62,8 @@ fun StoreHomeScreen(
             when(storeUiState.currentTab) {
                 TabType.HOME -> HomeScreen(storeUiState = storeUiState,viewModel = viewModel)
                 TabType.SCAN -> ScanScreen(viewModel = viewModel,storeUiState = storeUiState)
-//                TabType.INOUT -> MScreen(viewModel = viewModel, storeUiState = storeUiState)
                 TabType.INOUT -> {}
+//                    MovementsScreen(viewModel = viewModel, storeUiState = storeUiState)
             }
         }
 
@@ -74,8 +74,13 @@ fun StoreHomeScreen(
                 viewModel.updateCurrentTab(tabType)
                 when(storeUiState.currentTab){
                     TabType.HOME -> viewModel.getStoresList()
-                    TabType.SCAN -> {}
-                    TabType.INOUT -> {}
+                    TabType.SCAN -> {
+                        viewModel.getAllData()
+                        viewModel.getMovementList()
+                    }
+                    TabType.INOUT -> {
+
+                    }
                 }
 
 

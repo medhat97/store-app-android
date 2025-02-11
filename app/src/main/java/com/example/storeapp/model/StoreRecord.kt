@@ -5,17 +5,17 @@ import java.util.Date
 
 data class StoreRecord(
     val id: String = "",
-    val device_name:String = "",
-    val device_serial_number: String = "",
-    val adding_date: Date = Date(),
-    val device_official_name: String = "",
-    val device_official_serial: String = "",
-    val device_project: String = "",
-    val device_notes: String = "",
-    val device_image_status: String = "",
-    val device_status: String = "",
-    val rack_number: String = "",
-    val shelve_number: String = "",
-    val store_id: String = ""
+    val deviceName:String = "",
+    val deviceSerialNumber: String = "",
+    val addingDate: Date = Date(),
+    val deviceOfficialName: String = "",
+    val deviceOfficialSerial: String = "",
+    val deviceProject: String = "",
+    val deviceNotes: String = "",
+    val deviceImageStatus: String = "",
+    val deviceStatus: String = "",
+    val rackNumber: String = "",
+    val shelveNumber: String = "",
+    val storeNumber: String = ""
 )
 

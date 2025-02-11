@@ -16,5 +16,6 @@ data class StoreUiState(
     val currentSearchName: String = "",
     val currentNameSearchList:List<StoreRecord> = listOf(),
     val currentQRScanRecord: StoreRecord = StoreRecord(),
-    val movementsData: List<MovementRecord> = listOf()
+    val movementsData: List<MovementRecord> = listOf(),
+    val storeDataForMovement:List<StoreRecord> = listOf()
 )

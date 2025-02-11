@@ -12,7 +12,7 @@
 //import androidx.compose.ui.unit.dp
 //
 //@Composable
-//fun InoutScreen(
+//fun MovementsScreen(
 //    storeUiState: StoreUiState,
 //    viewModel: StoreViewModel){
 //

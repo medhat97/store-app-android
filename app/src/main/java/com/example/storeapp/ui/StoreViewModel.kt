@@ -22,6 +22,37 @@ class StoreViewModel : ViewModel() {
         getStoresList()
     }
 
+
+    fun getAllData(){
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    currentLoadingStatus = LoadingStatus.LOADING
+                )
+            }
+
+            try {
+                val listResult = StoreApi.retrofitService.getAllData()
+
+                _uiState.update {
+                    it.copy(
+                        storeDataForMovement = listResult
+                    )
+                }
+            } catch (e: IOException){
+                Log.i("Error Provider",e.toString())
+
+                _uiState.update {
+                    it.copy(
+                        currentLoadingStatus = LoadingStatus.FAILED
+                    )
+                }
+            }
+
+        }
+    }
+
+
     fun updateCurrentTab(tabType: TabType) {
         _uiState.update {
             it.copy(
@@ -105,7 +136,7 @@ class StoreViewModel : ViewModel() {
             }
 
             try {
-                val movementsList = StoreApi.retrofitService.getMovemets()
+                val movementsList = StoreApi.retrofitService.getMovements()
 
                 _uiState.update {
                     it.copy(
@@ -157,7 +188,7 @@ class StoreViewModel : ViewModel() {
 
     fun searchData(currentSearchName: String,totalList: List<StoreRecord>){
         val searchResult = totalList.filter {
-            it.device_name.contains(currentSearchName,ignoreCase = true)
+            it.deviceName.contains(currentSearchName,ignoreCase = true)
         }
         _uiState.update {
             it.copy(
@@ -177,7 +208,7 @@ class StoreViewModel : ViewModel() {
     fun scanDataSearch(currentSearchName: String,totalList: List<StoreRecord>){
 
         val searchQRRecord = (totalList.filter {
-            it.device_name.contains(currentSearchName,ignoreCase = true) })[0]
+            it.deviceName.contains(currentSearchName,ignoreCase = true) })[0]
 
         _uiState.update {
             it.copy(

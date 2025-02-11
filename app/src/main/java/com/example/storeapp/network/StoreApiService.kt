@@ -19,12 +19,14 @@ private val retrofit = Retrofit.Builder()
     .build()
 
 interface StoreApiService {
+    @GET
+    suspend fun getAllData():List<StoreRecord>
     @GET("devices")
     suspend fun getData(@Query("store_id") store_id: String ): List<StoreRecord>
     @GET("stores")
     suspend fun getStoreData(): List<StoresList>
     @GET("movement")
-    suspend fun getMovemets(): List<MovementRecord>
+    suspend fun getMovements(): List<MovementRecord>
 }
 
 object StoreApi {

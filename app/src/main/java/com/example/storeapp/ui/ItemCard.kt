@@ -71,7 +71,7 @@ fun ItemCard(storeRecord: StoreRecord, modifier: Modifier = Modifier){
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 1.dp)
                         )
-                        Text(text = storeRecord.device_name)
+                        Text(text = storeRecord.deviceName)
                     }
 
                 }
@@ -86,7 +86,7 @@ fun ItemCard(storeRecord: StoreRecord, modifier: Modifier = Modifier){
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 1.dp)
                         )
-                        Text(text = storeRecord.rack_number)
+                        Text(text = storeRecord.rackNumber)
                     }
                     Column(
                         modifier = Modifier
@@ -98,7 +98,7 @@ fun ItemCard(storeRecord: StoreRecord, modifier: Modifier = Modifier){
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 1.dp)
                         )
-                        Text(text = storeRecord.shelve_number)
+                        Text(text = storeRecord.shelveNumber)
                     }
 
 
@@ -112,7 +112,7 @@ fun ItemCard(storeRecord: StoreRecord, modifier: Modifier = Modifier){
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 1.dp)
                         )
-                        Text(text = storeRecord.store_id)
+                        Text(text = storeRecord.storeNumber)
                     }
                 }
             }
