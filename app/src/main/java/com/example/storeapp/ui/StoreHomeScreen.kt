@@ -1,5 +1,8 @@
 package com.example.storeapp.ui
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +29,7 @@ import com.example.storeapp.data.TabType
 
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun StoreHomeScreen(
     storeUiState: StoreUiState,
@@ -60,9 +64,9 @@ fun StoreHomeScreen(
                 .fillMaxWidth()
         ) {
             when(storeUiState.currentTab) {
-                TabType.HOME -> HomeScreen(storeUiState = storeUiState)
-                TabType.SCAN -> ScanScreen()
-                TabType.INOUT -> InoutScreen()
+                TabType.HOME -> HomeScreen(storeUiState = storeUiState,viewModel = viewModel)
+                TabType.SCAN -> ScanScreen(viewModel = viewModel,storeUiState = storeUiState)
+                TabType.INOUT -> MovementsScreen(viewModel = viewModel, storeUiState = storeUiState)
             }
         }
 
@@ -71,7 +75,21 @@ fun StoreHomeScreen(
             navigationItemContentList = navigationItemContentList,
             onTabSelected = { tabType: TabType ->
                 viewModel.updateCurrentTab(tabType)
-                viewModel.getStoreData()
+                Log.i("Current Tab: ",storeUiState.currentTab.toString())
+                when(storeUiState.currentTab){
+                    TabType.HOME -> viewModel.getStoresList()
+                    TabType.SCAN -> {
+//                        viewModel.getAllData()
+//                        viewModel.getMovementList()
+
+                    }
+                    TabType.INOUT -> {
+                        viewModel.getMovementList()
+
+//                        viewModel.getAllData()
+                    }
+                }
+
 
             },
             modifier = Modifier.fillMaxWidth()
