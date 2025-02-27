@@ -1,27 +1,57 @@
 package com.example.storeapp.ui
 
+import android.app.Application
+import android.os.Build
 import android.util.Log
-import androidx.lifecycle.ViewModel
-import com.example.storeapp.data.TabType
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
+import androidx.annotation.RequiresApi
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.storeapp.data.LoadingStatus
+import com.example.storeapp.data.StoreDatabase
+import com.example.storeapp.data.StoreEntity
+import com.example.storeapp.data.StoreRepository
+import com.example.storeapp.data.TabType
+import com.example.storeapp.data.toStoreRecord
 import com.example.storeapp.model.MovementRecord
 import com.example.storeapp.model.StoreRecord
-import com.example.storeapp.model.UpdateDeviceStatus
-import com.example.storeapp.network.StoreApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalTime
+import java.util.Date
+import java.util.Locale
 
-class StoreViewModel : ViewModel() {
+class StoreViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val storeDatabase = StoreDatabase.getDatabase(application, viewModelScope)
+    private val repository = StoreRepository(
+        storeDao = storeDatabase.storeDao(),
+        movementDao = storeDatabase.movementDao(),
+        storeListDao = storeDatabase.storeListDao(),
+        userDao = storeDatabase.userDao())
+
+    val allStores: StateFlow<List<StoreRecord>> = repository.allStores
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     private val _uiState = MutableStateFlow(StoreUiState())
     val uiState: StateFlow<StoreUiState> = _uiState
 
     init {
-        getStoresList()
+//        getStoresList()
         getMovementList()
         getAllData()
     }
@@ -30,13 +60,13 @@ class StoreViewModel : ViewModel() {
     fun getAllData(){
         viewModelScope.launch {
 
-
             try {
-                val listResult = StoreApi.retrofitService.getAllData()
+                val listResult = repository.allStores
+                Log.i("getAllDataCallData",listResult.first().toString())
 
                 _uiState.update {
                     it.copy(
-                        storeDataForMovement = listResult
+                        storeDataForMovement = listResult.first()
                     )
                 }
             } catch (e: IOException){
@@ -69,17 +99,20 @@ class StoreViewModel : ViewModel() {
             }
 
             try {
-                val listResult = StoreApi.retrofitService.getData(storeNumber = currentStoreId)
+                val listResult = repository.getStoresByNumber(storeNumber = currentStoreId)
+                Log.i("currentStore",listResult.first()[0].toString())
+                Log.i("currentStore",listResult.first()[1].toString())
+
 
                 _uiState.update {
                     it.copy(
                         data = listResult,
-                        currentNameSearchList = listResult,
+                        currentNameSearchList = listResult.first(),
                         currentLoadingStatus = LoadingStatus.SUCCESS
                     )
                 }
-            } catch (e: IOException){
-                Log.i("Error Provider",e.toString())
+            } catch (e: Exception){
+                Log.i("currentStoreError",e.toString())
 
                 _uiState.update {
                     it.copy(
@@ -95,6 +128,14 @@ class StoreViewModel : ViewModel() {
         _uiState.update {
             it.copy(
                 isBoxExpanded = !isBoxExpanded
+            )
+        }
+    }
+
+    fun changeMovementExpandStatus(isBoxExpanded: Boolean){
+        _uiState.update {
+            it.copy(
+                isMovementBoxExpanded = !isBoxExpanded
             )
         }
     }
@@ -138,23 +179,32 @@ class StoreViewModel : ViewModel() {
         }
     }
 
+    fun dismissMovementDropBox(){
+        _uiState.update {
+            it.copy(
+                isMovementBoxExpanded = false
+            )
+        }
+    }
 
-    fun getMovementList(){
+
+    fun getMovementList() {
         viewModelScope.launch {
 
 
             try {
-                val movementsList = StoreApi.retrofitService.getMovements()
-                Log.i("All movementsList",movementsList.toString())
-
+                val listResult = repository.allMovements
+                Log.i("getAllDataCallMove",listResult.first().toString())
                 _uiState.update {
                     it.copy(
-                        movementsData = movementsList,
+                        movementsData = listResult.first(),
                         currentLoadingStatus = LoadingStatus.SUCCESS
                     )
                 }
-            } catch (e: Exception) {
-                Log.i("Error Provideraaaaa",e.toString())
+
+
+            } catch (e: IOException){
+                Log.i("currentStoreError",e.toString())
 
                 _uiState.update {
                     it.copy(
@@ -162,34 +212,36 @@ class StoreViewModel : ViewModel() {
                     )
                 }
             }
+
         }
     }
 
-    fun getUsersList(){
-        viewModelScope.launch {
-
-
-            try {
-                val usersList = StoreApi.retrofitService.getAllUsers()
-
-                _uiState.update {
-                    it.copy(
-                        usersList = usersList
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        currentLoadingStatus = LoadingStatus.FAILED
-                    )
-                }
-            }
-        }
-    }
+//    fun getUsersList(){
+//        viewModelScope.launch {
+//
+//
+//            try {
+//                val usersList = repository.allUsers
+//
+//                _uiState.update {
+//                    it.copy(
+//                        usersList = usersList
+//                    )
+//                }
+//            } catch (e: Exception) {
+//                _uiState.update {
+//                    it.copy(
+//                        currentLoadingStatus = LoadingStatus.FAILED
+//                    )
+//                }
+//            }
+//        }
+//    }
 
 
 
     fun getStoresList(){
+
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
@@ -198,11 +250,10 @@ class StoreViewModel : ViewModel() {
             }
 
             try {
-                val storesList = StoreApi.retrofitService.getStoreData()
 
                 _uiState.update {
                     it.copy(
-                        stores = storesList,
+                        stores = listOf("ST01","ST02","ST03","ST04"),
                         currentLoadingStatus = LoadingStatus.SUCCESS
                     )
                 }
@@ -217,9 +268,14 @@ class StoreViewModel : ViewModel() {
         }
     }
 
-    fun searchData(currentSearchName: String,totalList: List<StoreRecord>){
-        val searchResult = totalList.filter {
-            it.deviceName.contains(currentSearchName,ignoreCase = true)
+    fun searchData(currentSearchName: String){
+
+        var searchResult: List<StoreRecord> = listOf()
+
+        viewModelScope.launch {
+            searchResult = repository.searchDevicesByName(currentSearchName).map {
+                list -> list.map { StoreEntity.toStoreRecord(it)}
+            }.first()
         }
         _uiState.update {
             it.copy(
@@ -236,11 +292,13 @@ class StoreViewModel : ViewModel() {
         }
     }
 
-    fun scanDataSearch(currentSearchName: String,totalList: List<StoreRecord>){
+    fun scanDataSearch(currentSearchName: String,totalList: Flow<List<StoreRecord>>){
 
-        val searchQRRecord = (totalList.filter {
-            it.deviceName.contains(currentSearchName,ignoreCase = true) })[0]
+//        val searchQRRecord = (totalList.filter {
+//            it.deviceName.contains(currentSearchName,ignoreCase = true) })[0]
+//
 
+        val searchQRRecord = (totalList.map { search -> search.filter { it.deviceName == currentSearchName } })
         _uiState.update {
             it.copy(
                 currentQRScanRecord = searchQRRecord
@@ -271,37 +329,49 @@ class StoreViewModel : ViewModel() {
             )
         }
     }
-    fun addMovement(movementRecord: MovementRecord){
+    fun addMovement(movementRecord: MovementRecord) {
         viewModelScope.launch {
             try {
-                StoreApi.retrofitService.addMovement(movementRecord)
+                repository.addMovement(movementRecord)
+                Log.i("YouClickedBorrow2","")
+
+                // After adding movement, refresh the list
+//                repository.refreshMovements()
+            } catch (e: Exception) {
+                Log.i("YouClickedBorrow3",e.toString())
             }
-            catch (e: IOException){
-                Log.i("Error Provider move",e.toString())}
         }
     }
 
-
-    fun updateDeviceStatusAfterMovement(storeRecord: StoreRecord,deviceStatus: String) {
+// For updating device Status After movement "OUT" -> "IN" and vice versa
+    fun updateDeviceStatusAfterMovement(storeRecord: StoreRecord, deviceStatus: String) {
         viewModelScope.launch {
             try {
-
-
-                val result = StoreApi.retrofitService.updateDeviceStatus(
-                    id = storeRecord.id,
-                    updateRequest = UpdateDeviceStatus(deviceStatus)
+                repository.updateDeviceStatusAfterMovement(
+                    deviceName = storeRecord.deviceName,
+                    deviceSerialNumber = storeRecord.deviceSerialNumber,
+                    deviceStatus = deviceStatus
                 )
 
-                getStoreData(_uiState.value.currentSelectedStore)
-                getMovementList()
-                getAllData()
-                Log.i("Update Status", result.toString())
-
-                _uiState.update {
-                    it.copy(currentChosenStoreRecord = result)
-                }
             } catch (e: Exception) {
-                Log.e("Update Status", "Failed to update status", e)
+                Log.i("Error Provider", e.toString())
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun updateReturnDateAndTimeAfterMovement(storeRecord: StoreRecord) {
+        viewModelScope.launch {
+            try {
+                repository.updateMovementReturnDateAndTime(
+                    deviceName = storeRecord.deviceName,
+                    deviceSerialNumber = storeRecord.deviceSerialNumber,
+                    returnTime = LocalTime.now().toString(),
+                    returnDate = LocalDate.now().toString()
+                )
+
+            } catch (e: Exception) {
+                Log.i("Error Provider", e.toString())
             }
         }
     }
@@ -313,6 +383,37 @@ class StoreViewModel : ViewModel() {
                 currentConfirmDialogStatus = !isExpanded
             )
         }
+    }
+
+
+
+
+
+    // The following function used to fetch data from the server and insert it into the room database
+    fun fetchDataFromServerAndInsertItIntoDatabase(){
+        viewModelScope.launch {
+            val date = Date() // Current date and time
+            val formatter = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.ENGLISH)
+            val formattedDate = formatter.format(date)
+            try {
+                repository.fetchDataFromServerAndInsertItIntoDatabase()
+                _uiState.update {
+                    it.copy(
+                        currentLoadingStatus = LoadingStatus.SUCCESS,
+                        lastSyncTime = formattedDate
+
+                    )
+                }
+            }
+            catch (e: Exception){
+                _uiState.update {
+                    it.copy(
+                        currentLoadingStatus = LoadingStatus.SUCCESS
+
+                    )
+                }
+
+            }            }
     }
 
 

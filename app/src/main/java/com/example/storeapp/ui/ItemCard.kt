@@ -224,7 +224,7 @@ fun ItemCardDetail(
             }
             Button(onClick = {
                 viewModel.updateDialogShow(true)
-                viewModel.getUsersList()
+//                viewModel.getUsersList()
                 viewModel.updateCurrentStoreRecord(storeRecord)
             }, enabled = !buttonDisable, shape = RoundedCornerShape(6.dp) ,modifier = Modifier.width(100.dp)) { Text("Borrow") }
 

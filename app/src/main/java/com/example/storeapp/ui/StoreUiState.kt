@@ -1,32 +1,38 @@
 package com.example.storeapp.ui
 
 import com.example.storeapp.data.LoadingStatus
+import com.example.storeapp.data.SearchType
 import com.example.storeapp.data.TabType
 import com.example.storeapp.model.StoreRecord
-import com.example.storeapp.model.StoresList
 import com.example.storeapp.model.MovementRecord
 import com.example.storeapp.model.StoreUsers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 data class StoreUiState(
     val currentTab: TabType = TabType.HOME,
-    val data: List<StoreRecord> = listOf(),
+    val data: Flow<List<StoreRecord>> = flowOf(emptyList()),
     val currentLoadingStatus: LoadingStatus = LoadingStatus.LOADING,
-    val stores: List<StoresList> =listOf(),
+    val stores: List<String> = listOf("ST01","ST02","ST03","ST04"),
     val isBoxExpanded: Boolean = false,
     val currentSelectedStore: String = "",
     val currentSearchName: String = "",
-    val currentNameSearchList:List<StoreRecord> = listOf(),
-    val currentQRScanRecord: StoreRecord = StoreRecord(),
+    val currentNameSearchList: List<StoreRecord> = listOf(),
+    val currentQRScanRecord: Flow<List<StoreRecord>> = flowOf(emptyList()),
     val movementsData: List<MovementRecord> = listOf(),
-    val storeDataForMovement:List<StoreRecord> = listOf(),
+    val storeDataForMovement: List<StoreRecord> = listOf(),
     val storeCardExpand: Boolean = false,
     val currentDialogLoaner: String = "",
     val currentDialogRecipient: String = "",
     val currentLoanDropExpand: Boolean = false,
     val currentRecipientDropExpand: Boolean = false,
     val isBorrowDropShown: Boolean = false,
-    val usersList: List<StoreUsers> = listOf(),
+    val usersList: List<String> = listOf("Ahmed Elsaadany","Medhat Qurtam"),
     val currentChosenStoreRecord: StoreRecord = StoreRecord(),
-    val currentConfirmDialogStatus: Boolean = false
-
+    val currentConfirmDialogStatus: Boolean = false,
+    val serverConnection:Boolean = false,
+    val lastSyncTime: String = "Not synced yet",
+    val isMovementBoxExpanded: Boolean = false,
+    val currentSelectedSearchType: String = "",
+    val searchTypes: List<SearchType> = listOf(SearchType.Recipient,SearchType.Status,SearchType.Store)
 )

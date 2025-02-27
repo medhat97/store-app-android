@@ -28,11 +28,11 @@ fun ScanScreen(
         verticalArrangement = Arrangement.Center
     ) {
         // Display the ItemCard with the current scanned record
-        ItemCard(
-            storeRecord = storeUiState.currentQRScanRecord,
-            viewModel = viewModel,
-            modifier = Modifier.padding(16.dp)
-        )
+//        ItemCard(
+//            storeRecord = storeUiState.currentQRScanRecord,
+//            viewModel = viewModel,
+//            modifier = Modifier.padding(16.dp)
+//        )
 
         QRScannerButton { scannedData ->
             // When QR is scanned, search for the record and update UI state

@@ -5,6 +5,7 @@ import java.sql.Time
 import java.util.Date
 
 data class MovementRecord(
+    val id: Int = 0,
     val deviceName: String = "",
     val deviceSerialNumber: String = "",
     val loanDate: String = "",
@@ -20,4 +21,6 @@ data class MovementRecord(
     val deviceNotes: String = "",
     val storeNumber: String = "",
 
-    )
+    ){
+    companion object
+}

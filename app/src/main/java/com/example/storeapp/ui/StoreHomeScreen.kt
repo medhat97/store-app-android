@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
@@ -58,6 +59,9 @@ fun StoreHomeScreen(
             .fillMaxSize()
             .navigationBarsPadding()
     ) {
+        storeTopBar(
+            viewModel = viewModel,
+            storeUiState = storeUiState)
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -66,7 +70,9 @@ fun StoreHomeScreen(
             when(storeUiState.currentTab) {
                 TabType.HOME -> HomeScreen(storeUiState = storeUiState,viewModel = viewModel)
                 TabType.SCAN -> ScanScreen(viewModel = viewModel,storeUiState = storeUiState)
-                TabType.INOUT -> MovementsScreen(viewModel = viewModel, storeUiState = storeUiState)
+                TabType.INOUT -> MovementsScreen(
+                    viewModel = viewModel,
+                    storeUiState = storeUiState)
             }
         }
 
@@ -85,8 +91,6 @@ fun StoreHomeScreen(
                     }
                     TabType.INOUT -> {
                         viewModel.getMovementList()
-
-//                        viewModel.getAllData()
                     }
                 }
 
@@ -105,7 +109,7 @@ fun StoreAppBottomNavigationBar(
     modifier: Modifier = Modifier
 ){
     NavigationBar(
-        modifier = modifier,
+        modifier = modifier.height(65.dp),
         tonalElevation = 8.dp
     ) {
         for (navItem in navigationItemContentList) {

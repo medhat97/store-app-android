@@ -1,6 +1,8 @@
 package com.example.storeapp.ui
 
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,7 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.storeapp.model.MovementRecord
 
+import java.time.LocalDate
+import java.time.LocalTime
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ConfirmDialog(
     viewModel: StoreViewModel,
@@ -45,11 +51,23 @@ fun ConfirmDialog(
                     horizontalArrangement = Arrangement.spacedBy(10.dp, alignment = Alignment.CenterHorizontally)
                 ) {
                     Button(onClick = {
+
+
+
+
+
+
+                        viewModel.updateReturnDateAndTimeAfterMovement(
+                            storeRecord = storeUiState.currentChosenStoreRecord
+                        )
                         viewModel.updateDeviceStatusAfterMovement(
                             storeRecord = storeUiState.currentChosenStoreRecord,
                             deviceStatus = "IN"
                         )
                         viewModel.changeConfirmDialogStatus(true)
+                        viewModel.getStoreData(storeUiState.currentSelectedStore)
+                        viewModel.getMovementList()
+
 
                     }) { Text(text = "Yes") }
 

@@ -45,22 +45,20 @@ fun HomeScreen(
     storeUiState: StoreUiState,
     viewModel: StoreViewModel
 ){
-
-
     when(storeUiState.currentLoadingStatus){
         LoadingStatus.SUCCESS -> SuccessScreen(storeUiState = storeUiState, viewModel = viewModel)
         LoadingStatus.LOADING -> LoadingScreen()
         LoadingStatus.FAILED -> ErrorScreen()
     }
 }
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SuccessScreen(storeUiState: StoreUiState,viewModel: StoreViewModel){
+
     Column(
         modifier = Modifier
             .windowInsetsPadding(WindowInsets.systemBars)
-            .padding(16.dp),
+            .padding(top = 0.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -86,9 +84,7 @@ fun SuccessScreen(storeUiState: StoreUiState,viewModel: StoreViewModel){
                     onValueChange = {
                         viewModel.updateSearchTextField(it)
                         viewModel.searchData(
-                            currentSearchName = it,
-                            totalList = storeUiState.data
-                        )
+                            currentSearchName = it)
                     },
                     label = { Text(text = "Search by name") },
                     modifier = Modifier.fillMaxWidth(),
@@ -103,7 +99,7 @@ fun SuccessScreen(storeUiState: StoreUiState,viewModel: StoreViewModel){
         ){
             items(storeUiState.currentNameSearchList
             ) {
-                    storeRecord -> ItemCard(
+                storeRecord -> ItemCard(
                 viewModel = viewModel,
                 storeRecord = storeRecord,
                 modifier = Modifier)

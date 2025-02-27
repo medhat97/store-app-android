@@ -21,6 +21,8 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -37,6 +39,7 @@ fun BorrowDialog(
     storeUiState: StoreUiState,
 
     ){
+
     Dialog(onDismissRequest = {
         viewModel.updateDialogShow(false)
         viewModel.updateBorrowTextField("")
@@ -72,28 +75,34 @@ fun BorrowDialog(
                 ) {
 
                     Button(onClick = {
-                        viewModel.addMovement(MovementRecord(
+                        viewModel.addMovement(
+                            MovementRecord(
                             deviceName = storeUiState.currentChosenStoreRecord.deviceName,
                             deviceSerialNumber = storeUiState.currentChosenStoreRecord.deviceSerialNumber,
                             deviceProject = storeUiState.currentChosenStoreRecord.deviceProject,
                             deviceNotes = storeUiState.currentChosenStoreRecord.deviceNotes,
                             receiverAdmin = storeUiState.currentDialogRecipient,
                             deviceOfficialName = storeUiState.currentChosenStoreRecord.deviceOfficialName,
+                            storeNumber = storeUiState.currentChosenStoreRecord.storeNumber,
                             loanDate = LocalDate.now().toString(),
                             loanTime = LocalTime.now().toString()
                         )
-
                         )
-
+                        Log.i("YouClickedBorrow1",storeUiState.toString())
                         viewModel.updateDeviceStatusAfterMovement(
                             storeRecord = storeUiState.currentChosenStoreRecord,
                             deviceStatus = "OUT"
                         )
 
                         viewModel.updateDialogShow(false)
+                        viewModel.getStoreData(storeUiState.currentSelectedStore)
+                        viewModel.getMovementList()
 
 
                     }, shape = RoundedCornerShape(6.dp) ,modifier = Modifier.width(100.dp)) { Text("Ok") }
+
+
+
                     Button(onClick = {
                         viewModel.updateDialogShow(false)
                     },shape = RoundedCornerShape(6.dp) ,modifier = Modifier.width(100.dp)) { Text("Cancel") }
@@ -117,7 +126,7 @@ fun BorrowDropBox(
     value:String,
     expand:Boolean,
     onExpandChange: (Boolean) -> Unit,
-    namesList:List<StoreUsers>,
+    namesList:List<String>,
     onDismiss: () -> Unit,
     label: String,
     viewModel: StoreViewModel){
@@ -153,9 +162,9 @@ fun BorrowDropBox(
 
                     DropdownMenuItem(
 
-                        text = { Text(text = item.userName) },
+                        text = { Text(text = item) },
                         onClick = {
-                            viewModel.updateBorrowTextField(item.userName)
+                            viewModel.updateBorrowTextField(item)
                             viewModel.changeBorrowExpandStatus(true)
 
                         }

@@ -1,5 +1,6 @@
 package com.example.storeapp.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,6 +15,7 @@ import androidx.compose.runtime.Composable
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,19 +49,23 @@ fun StoreDropBox(
                 expanded = storeUiState.isBoxExpanded,
                 onDismissRequest = {viewModel.dismissDropBox()}
             ) {
-                storeUiState.stores.forEach {
+                storeUiState.stores.map {
                         item ->
+
                     DropdownMenuItem(
 
-                        text = { Text(text = item.id) },
+                        text = { Text(text = item) },
                         onClick = {
-                            viewModel.updateDropBoxTextField(item.id)
+                            viewModel.updateDropBoxTextField(item)
                             viewModel.dismissDropBox()
-                            viewModel.getStoreData(item.id)
+                            viewModel.getStoreData(item)
+                            Log.i("DropStore",item)
                             viewModel.clearSearchTextField()
 
                         }
                     )
+                }
+
                 }
 
 
@@ -69,4 +75,3 @@ fun StoreDropBox(
         }
     }
 
-}

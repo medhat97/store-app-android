@@ -105,7 +105,7 @@ fun MovementCard(
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(bottom = 1.dp)
                             )
-                            Text(text = storeRecord.deviceStatus)
+                            Text(text = if(movementRecord.returnDate == "" && movementRecord.returnTime == "") "OUT" else "IN")
                         }
 
 

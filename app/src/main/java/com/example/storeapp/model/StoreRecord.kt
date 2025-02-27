@@ -17,5 +17,7 @@ data class StoreRecord(
     val rackNumber: String = "",
     val shelveNumber: String = "",
     val storeNumber: String = ""
-)
+){
+    companion object
+}
 
