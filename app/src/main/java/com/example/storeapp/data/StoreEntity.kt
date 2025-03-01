@@ -50,7 +50,7 @@ fun StoreEntity.Companion.toStoreRecord(storeEntity: StoreEntity): StoreRecord {
 // Used to convert StoreRecord to Store Entity
 fun StoreRecord.Companion.toStoreEntity(storeRecord: StoreRecord): StoreEntity {
     return StoreEntity(
-        id = storeRecord.id,
+        id = storeRecord.id,  // ID should already be set in the StoreRecord
         deviceName = storeRecord.deviceName,
         deviceSerialNumber = storeRecord.deviceSerialNumber,
         addingDate = storeRecord.addingDate,

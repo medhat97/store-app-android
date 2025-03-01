@@ -105,6 +105,43 @@ fun searchDevicesByName(searchString: String): Flow<List<StoreEntity>>{
     }
 
 
+    // The following function used for edit a device information
+    suspend fun editDeviceInformation(storeRecord: StoreRecord){
+        storeDao.editDeviceInformation(StoreRecord.toStoreEntity(storeRecord))
+    }
+
+    // The following function used for add  a new device information
+
+    private suspend fun addNewDeviceInformationInternal(storeRecord: StoreRecord){
+        val deviceWithId = storeRecord.copy(
+            id = "${storeRecord.deviceName}_${storeRecord.deviceSerialNumber}_${System.currentTimeMillis()}"
+        )
+        storeDao.addNewDeviceInformationInternal(StoreRecord.toStoreEntity(deviceWithId))
+        Log.i("New Device2",deviceWithId.toString())
+    }
+
+suspend fun getDeviceCount(deviceName: String, deviceSerialNumber: String): Int{
+    return storeDao.getDeviceCount(deviceName = deviceName,deviceSerialNumber = deviceSerialNumber)
+}
+
+
+    /**
+     * Adds a new device after checking for duplicates.
+     * @return true if device was added successfully, false if a duplicate was found
+     */
+    suspend fun addNewDeviceInformation(addedDevice: StoreRecord): Boolean {
+        // Here we get first the number of the devices with that information
+        val count = getDeviceCount(addedDevice.deviceName, addedDevice.deviceSerialNumber)
+        return if (count > 0) {
+            false // Device already exists
+        } else {
+            addNewDeviceInformationInternal(addedDevice)
+            true // Device not exists
+        }
+    }
+
+
+
     // The following function used to fetch data from the server and insert it into the room database
     suspend fun fetchDataFromServerAndInsertItIntoDatabase(){
 

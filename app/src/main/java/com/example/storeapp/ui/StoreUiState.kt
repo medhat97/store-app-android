@@ -34,5 +34,11 @@ data class StoreUiState(
     val lastSyncTime: String = "Not synced yet",
     val isMovementBoxExpanded: Boolean = false,
     val currentSelectedSearchType: String = "",
-    val searchTypes: List<SearchType> = listOf(SearchType.Recipient,SearchType.Status,SearchType.Store)
+    val searchTypes: List<SearchType> = listOf(SearchType.Recipient,SearchType.Status,SearchType.Store),
+    val editDialogExpand: Boolean = false,
+    val addDialogExpand: Boolean = false,
+    val editedStoreValues: Map<String, String> = emptyMap(),
+    val addedStoreValues: StoreRecord = StoreRecord(),
+    val deviceExistTextExpand: Boolean = false,
+    val userMessage:String = ""
 )

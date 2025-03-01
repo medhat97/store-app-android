@@ -1,8 +1,10 @@
 package com.example.storeapp.ui
 
 import android.app.Activity
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.example.storeapp.model.StoreRecord
 import com.google.zxing.integration.android.IntentIntegrator
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ScanScreen(
     viewModel: StoreViewModel,
@@ -33,7 +36,6 @@ fun ScanScreen(
 //            viewModel = viewModel,
 //            modifier = Modifier.padding(16.dp)
 //        )
-
         QRScannerButton { scannedData ->
             // When QR is scanned, search for the record and update UI state
             viewModel.scanDataSearch(scannedData, storeUiState.data)

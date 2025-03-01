@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -43,17 +45,18 @@ import com.example.storeapp.ui.theme.StoreAppTheme
 @Composable
 fun HomeScreen(
     storeUiState: StoreUiState,
-    viewModel: StoreViewModel
+    viewModel: StoreViewModel,
+    paddingValues: PaddingValues
 ){
     when(storeUiState.currentLoadingStatus){
-        LoadingStatus.SUCCESS -> SuccessScreen(storeUiState = storeUiState, viewModel = viewModel)
+        LoadingStatus.SUCCESS -> SuccessScreen(storeUiState = storeUiState, viewModel = viewModel,paddingValues = paddingValues)
         LoadingStatus.LOADING -> LoadingScreen()
         LoadingStatus.FAILED -> ErrorScreen()
     }
 }
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SuccessScreen(storeUiState: StoreUiState,viewModel: StoreViewModel){
+fun SuccessScreen(storeUiState: StoreUiState,viewModel: StoreViewModel,paddingValues: PaddingValues){
 
     Column(
         modifier = Modifier
@@ -119,6 +122,22 @@ fun SuccessScreen(storeUiState: StoreUiState,viewModel: StoreViewModel){
                 viewModel  = viewModel,
                 storeUiState = storeUiState
             )
+        }
+
+        if(storeUiState.editDialogExpand){
+            EditDialog(
+                viewModel = viewModel,
+                storeUiState = storeUiState,
+                storeRecord = storeUiState.currentChosenStoreRecord,
+
+            )
+        }
+
+        if(storeUiState.addDialogExpand){
+            AddDialog(
+                viewModel = viewModel,
+                storeUiState = storeUiState
+                )
         }
 
     }

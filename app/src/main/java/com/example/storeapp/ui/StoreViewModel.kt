@@ -40,12 +40,12 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         storeListDao = storeDatabase.storeListDao(),
         userDao = storeDatabase.userDao())
 
-    val allStores: StateFlow<List<StoreRecord>> = repository.allStores
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+//    val allStores: StateFlow<List<StoreRecord>> = repository.allStores
+//        .stateIn(
+//            scope = viewModelScope,
+//            started = SharingStarted.WhileSubscribed(5000),
+//            initialValue = emptyList()
+//        )
 
     private val _uiState = MutableStateFlow(StoreUiState())
     val uiState: StateFlow<StoreUiState> = _uiState
@@ -385,9 +385,163 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /////////////////////////////////////////////////// This Part For Edit Dialog !!!!!!  ////////////////////////////////////////////////////////////
+
+    // Function to update a field in the edit dialog
+    fun updateEditDialogField(fieldName: String, value: String) {
+        _uiState.update { currentState ->
+            val updatedMap = currentState.editedStoreValues.toMutableMap()
+            updatedMap[fieldName] = value
+            currentState.copy(editedStoreValues = updatedMap)
+        }
+    }
+
+    // Function to initialize edit dialog fields with current values
+    fun initializeEditDialogFields(storeRecord: StoreRecord) {
+        val initialValues = mapOf(
+            "deviceName" to storeRecord.deviceName,
+            "deviceSerialNumber" to storeRecord.deviceSerialNumber,
+            "deviceOfficialName" to storeRecord.deviceOfficialName,
+            "deviceOfficialSerial" to storeRecord.deviceOfficialSerial,
+            "shelveNumber" to storeRecord.shelveNumber,
+            "rackNumber" to storeRecord.rackNumber,
+            "storeNumber" to storeRecord.storeNumber,
+            "deviceProject" to storeRecord.deviceProject,
+            "deviceNotes" to storeRecord.deviceNotes
+        )
+        
+        _uiState.update { it.copy(editedStoreValues = initialValues) }
+    }
+
+    // Function to clear edit dialog fields
+    fun clearEditDialogFields() {
+        _uiState.update { it.copy(editedStoreValues = emptyMap()) }
+    }
+
+    fun changeEditDialogExpand(status:Boolean){
+        _uiState.update {
+            it.copy(
+                editDialogExpand = status
+            )
+        }
+    }
+
+    fun editDeviceInformation(storeRecord: StoreRecord){
+        viewModelScope.launch {
+            // Create updated StoreRecord from the edited values
+            val updatedStoreRecord = storeRecord.copy(
+                deviceOfficialName = _uiState.value.editedStoreValues["deviceOfficialName"] ?: storeRecord.deviceOfficialName,
+                deviceOfficialSerial = _uiState.value.editedStoreValues["deviceOfficialSerial"] ?: storeRecord.deviceOfficialSerial,
+                shelveNumber = _uiState.value.editedStoreValues["shelveNumber"] ?: storeRecord.shelveNumber,
+                rackNumber = _uiState.value.editedStoreValues["rackNumber"] ?: storeRecord.rackNumber,
+                storeNumber = _uiState.value.editedStoreValues["storeNumber"] ?: storeRecord.storeNumber,
+                deviceProject = _uiState.value.editedStoreValues["deviceProject"] ?: storeRecord.deviceProject,
+                deviceNotes = _uiState.value.editedStoreValues["deviceNotes"] ?: storeRecord.deviceNotes
+            )
+            
+            repository.editDeviceInformation(updatedStoreRecord)
+
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
+    //////////////////////////////////////////////////////This Part For Add Dialog !!!!!! /////////////////////////////////////////////////////////
+
+
+
+    fun updateAddDialogField(fieldName: String, value: String) {
+        _uiState.update { currentState ->
+            val currentRecord = currentState.addedStoreValues
+            val updatedRecord = when (fieldName) {
+                "deviceName" -> currentRecord.copy(deviceName = value)
+                "deviceSerialNumber" -> currentRecord.copy(deviceSerialNumber = value)
+                "deviceOfficialName" -> currentRecord.copy(deviceOfficialName = value)
+                "deviceOfficialSerial" -> currentRecord.copy(deviceOfficialSerial = value)
+                "shelveNumber" -> currentRecord.copy(shelveNumber = value)
+                "rackNumber" -> currentRecord.copy(rackNumber = value)
+                "storeNumber" -> currentRecord.copy(storeNumber = value)
+                "deviceProject" -> currentRecord.copy(deviceProject = value)
+                "deviceNotes" -> currentRecord.copy(deviceNotes = value)
+                else -> currentRecord
+            }
+            currentState.copy(addedStoreValues = updatedRecord)
+        }
+    }
+
+    fun clearAddDialogFields() {
+        _uiState.update { it.copy(addedStoreValues = StoreRecord()) }
+    }
+
+    fun changeAddDialogExpand(status:Boolean){
+        _uiState.update {
+            it.copy(
+                addDialogExpand = status
+            )
+        }
+    }
+
+//    fun addNewDeviceInformation(newDeviceRecord: StoreRecord){
+//        viewModelScope.launch {
+//            repository.addNewDeviceInformation(newDeviceRecord)
+//
+//        }
+//    }
+
+    fun addNewDevice(device: StoreRecord) {
+        viewModelScope.launch {
+            try {
+                val success = repository.addNewDeviceInformation(device)
+                if (!success) {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            userMessage = "${device.deviceName} / ${device.deviceSerialNumber} already exists",
+                            deviceExistTextExpand = true
+                        )
+                    }
+                } else {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            userMessage = "Device with name '${device.deviceName}' and serial number '${device.deviceSerialNumber}' added successfully",
+                            deviceExistTextExpand = false,
+                            addDialogExpand = false
+                        )
+                    }
+                    getStoreData(uiState.value.currentSelectedStore)
+                    clearAddDialogFields()
+                }
+            } catch (e: IOException) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        userMessage = "Failed to add device: ${e.message}",
+                        deviceExistTextExpand = true
+                    )
+                }
+            }
+        }
+    }
+
+    fun updateUserMessage(message: String) {
+        _uiState.update { currentState ->
+            currentState.copy(userMessage = message)
+        }
+    }
+
+    fun clearUserMessage() {
+        _uiState.update { currentState ->
+            currentState.copy(userMessage = "")
+        }
+    }
+
+    fun changeErrorMessageExpand(expand:Boolean) {
+        _uiState.update { currentState ->
+            currentState.copy(deviceExistTextExpand = expand)
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // The following function used to fetch data from the server and insert it into the room database
     fun fetchDataFromServerAndInsertItIntoDatabase(){

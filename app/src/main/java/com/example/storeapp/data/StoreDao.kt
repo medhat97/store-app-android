@@ -24,4 +24,32 @@ interface StoreDao {
 
     @Query("SELECT * FROM devices WHERE deviceName LIKE '%' || :searchString || '%'")
     fun searchDevicesByName(searchString: String): Flow<List<StoreEntity>>
+
+
+//    @Query("UPDATE devices SET deviceOfficialName = :deviceOfficialName AND deviceOfficialSerial= :deviceOfficialSerial" +
+//            " AND shelveNumber= :shelveNumber AND rackNumber= :rackNumber " +
+//            "AND storeNumber= :storeNumber AND deviceProject= :deviceProject " +
+//            "AND deviceNotes= :deviceNotes  WHERE deviceName = :deviceName AND deviceSerialNumber= :deviceSerialNumber")
+//    suspend fun editDeviceInformation(deviceName:String,
+//                                      deviceSerialNumber: String,
+//                                      deviceOfficialName: String,
+//                                      deviceOfficialSerial: String,
+//                                      shelveNumber: String,
+//                                      rackNumber: String,
+//                                      storeNumber)
+
+
+    // That Query used to get the number of devices that have the same entered deviceName and deviceSerialNumber
+    @Query("SELECT COUNT(*) FROM devices WHERE deviceName = :deviceName AND deviceSerialNumber = :deviceSerialNumber")
+    suspend fun getDeviceCount(deviceName: String, deviceSerialNumber: String): Int
+
+
+    // That function used to insert the new added device into the room database
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun addNewDeviceInformationInternal(addedDevice: StoreEntity)
+
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun editDeviceInformation(editedDevice: StoreEntity)
 }

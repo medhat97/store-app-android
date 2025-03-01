@@ -224,7 +224,6 @@ fun ItemCardDetail(
             }
             Button(onClick = {
                 viewModel.updateDialogShow(true)
-//                viewModel.getUsersList()
                 viewModel.updateCurrentStoreRecord(storeRecord)
             }, enabled = !buttonDisable, shape = RoundedCornerShape(6.dp) ,modifier = Modifier.width(100.dp)) { Text("Borrow") }
 
@@ -235,6 +234,16 @@ fun ItemCardDetail(
 
             }, enabled = buttonDisable,shape = RoundedCornerShape(6.dp) ,modifier = Modifier.width(100.dp)) { Text("Return") }
 
+
+
+            Button(onClick = {
+                viewModel.changeEditDialogExpand(true)
+
+                viewModel.updateCurrentStoreRecord(storeRecord)
+
+            },shape = RoundedCornerShape(6.dp) ,modifier = Modifier.width(100.dp)) { Text("Edit") }
+
+
         }
     }
 
@@ -242,13 +251,3 @@ fun ItemCardDetail(
 }
 
 
-//@Preview
-//@Composable
-//fun ItemCardPreview(){
-//    StoreAppTheme {
-//
-//        ItemCard(
-//
-//            storeRecord = StoreRecord())
-//    }
-//}

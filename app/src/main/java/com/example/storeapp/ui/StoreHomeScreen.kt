@@ -10,12 +10,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
@@ -68,7 +71,22 @@ fun StoreHomeScreen(
                 .fillMaxWidth()
         ) {
             when(storeUiState.currentTab) {
-                TabType.HOME -> HomeScreen(storeUiState = storeUiState,viewModel = viewModel)
+                TabType.HOME ->
+                    Scaffold(
+                        floatingActionButton = {
+                            FloatingActionButton(
+                                onClick = {
+                                    viewModel.changeAddDialogExpand(true)
+                                }
+                            ) {
+
+                                Icon(Icons.Default.Add, contentDescription = "Add device")
+                            }
+                        }
+                    ) {
+                        paddingValues ->
+
+                    HomeScreen(storeUiState = storeUiState,viewModel = viewModel,paddingValues = paddingValues)}
                 TabType.SCAN -> ScanScreen(viewModel = viewModel,storeUiState = storeUiState)
                 TabType.INOUT -> MovementsScreen(
                     viewModel = viewModel,
