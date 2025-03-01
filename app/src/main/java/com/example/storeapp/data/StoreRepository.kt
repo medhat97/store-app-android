@@ -114,10 +114,11 @@ fun searchDevicesByName(searchString: String): Flow<List<StoreEntity>>{
 
     private suspend fun addNewDeviceInformationInternal(storeRecord: StoreRecord){
         val deviceWithId = storeRecord.copy(
-            id = "${storeRecord.deviceName}_${storeRecord.deviceSerialNumber}_${System.currentTimeMillis()}"
+            id = "${storeRecord.deviceName}_${storeRecord.deviceSerialNumber}_${System.currentTimeMillis()}",
+            deviceStatus = "IN"
         )
         storeDao.addNewDeviceInformationInternal(StoreRecord.toStoreEntity(deviceWithId))
-        Log.i("New Device2",deviceWithId.toString())
+
     }
 
 suspend fun getDeviceCount(deviceName: String, deviceSerialNumber: String): Int{

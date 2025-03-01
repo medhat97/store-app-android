@@ -509,7 +509,16 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                             addDialogExpand = false
                         )
                     }
-                    getStoreData(uiState.value.currentSelectedStore)
+                    if(device.storeNumber.isNotBlank()){
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                currentSelectedStore = device.storeNumber
+
+                            )
+                        }
+
+                            getStoreData(_uiState.value.currentSelectedStore)
+                        }
                     clearAddDialogFields()
                 }
             } catch (e: IOException) {
