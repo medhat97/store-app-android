@@ -40,5 +40,7 @@ data class StoreUiState(
     val editedStoreValues: Map<String, String> = emptyMap(),
     val addedStoreValues: StoreRecord = StoreRecord(),
     val deviceExistTextExpand: Boolean = false,
+    val deviceEditExistTextExpand: Boolean = false,
+
     val userMessage:String = ""
 )

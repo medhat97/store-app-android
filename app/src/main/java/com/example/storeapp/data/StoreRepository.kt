@@ -106,8 +106,8 @@ fun searchDevicesByName(searchString: String): Flow<List<StoreEntity>>{
 
 
     // The following function used for edit a device information
-    suspend fun editDeviceInformation(storeRecord: StoreRecord){
-        storeDao.editDeviceInformation(StoreRecord.toStoreEntity(storeRecord))
+    private suspend fun editDeviceInformationInternal(storeRecord: StoreRecord){
+        storeDao.editDeviceInformationInternal(StoreRecord.toStoreEntity(storeRecord))
     }
 
     // The following function used for add  a new device information
@@ -125,6 +125,13 @@ suspend fun getDeviceCount(deviceName: String, deviceSerialNumber: String): Int{
     return storeDao.getDeviceCount(deviceName = deviceName,deviceSerialNumber = deviceSerialNumber)
 }
 
+    suspend fun getDeviceCountExcludingCurrent(deviceName: String, deviceSerialNumber: String,currentId: String): Int{
+        return storeDao.getDeviceCountExcludingCurrent(
+            deviceName = deviceName,
+            deviceSerialNumber = deviceSerialNumber,
+            currentId = currentId
+            )
+    }
 
     /**
      * Adds a new device after checking for duplicates.
@@ -138,6 +145,22 @@ suspend fun getDeviceCount(deviceName: String, deviceSerialNumber: String): Int{
         } else {
             addNewDeviceInformationInternal(addedDevice)
             true // Device not exists
+        }
+    }
+
+
+    suspend fun editDeviceInformation(editedDevice: StoreRecord): Boolean {
+        // Check for duplicates excluding the current device
+        val count = getDeviceCountExcludingCurrent(
+            deviceName = editedDevice.deviceName,
+            deviceSerialNumber = editedDevice.deviceSerialNumber,
+            currentId = editedDevice.id
+        )
+        return if (count > 0) {
+            false // Another device with same name/serial exists
+        } else {
+            editDeviceInformationInternal(editedDevice)
+            true // Update successful
         }
     }
 

@@ -51,5 +51,10 @@ interface StoreDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun editDeviceInformation(editedDevice: StoreEntity)
+    suspend fun editDeviceInformationInternal(editedDevice: StoreEntity)
+
+    // Check for duplicate devices excluding the current device being edited
+    @Query("SELECT COUNT(*) FROM devices WHERE deviceName = :deviceName AND deviceSerialNumber = :deviceSerialNumber AND id != :currentId")
+    suspend fun getDeviceCountExcludingCurrent(deviceName: String, deviceSerialNumber: String, currentId: String): Int
+
 }

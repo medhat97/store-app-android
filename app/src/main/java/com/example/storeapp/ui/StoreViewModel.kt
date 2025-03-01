@@ -420,27 +420,63 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     fun changeEditDialogExpand(status:Boolean){
         _uiState.update {
+
+
+
             it.copy(
                 editDialogExpand = status
             )
         }
     }
 
-    fun editDeviceInformation(storeRecord: StoreRecord){
-        viewModelScope.launch {
-            // Create updated StoreRecord from the edited values
-            val updatedStoreRecord = storeRecord.copy(
-                deviceOfficialName = _uiState.value.editedStoreValues["deviceOfficialName"] ?: storeRecord.deviceOfficialName,
-                deviceOfficialSerial = _uiState.value.editedStoreValues["deviceOfficialSerial"] ?: storeRecord.deviceOfficialSerial,
-                shelveNumber = _uiState.value.editedStoreValues["shelveNumber"] ?: storeRecord.shelveNumber,
-                rackNumber = _uiState.value.editedStoreValues["rackNumber"] ?: storeRecord.rackNumber,
-                storeNumber = _uiState.value.editedStoreValues["storeNumber"] ?: storeRecord.storeNumber,
-                deviceProject = _uiState.value.editedStoreValues["deviceProject"] ?: storeRecord.deviceProject,
-                deviceNotes = _uiState.value.editedStoreValues["deviceNotes"] ?: storeRecord.deviceNotes
-            )
-            
-            repository.editDeviceInformation(updatedStoreRecord)
 
+
+    fun editDeviceInformation(storeRecord: StoreRecord){
+        val updatedStoreRecord = storeRecord.copy(
+            deviceName = _uiState.value.editedStoreValues["deviceName"] ?: storeRecord.deviceName,
+            deviceSerialNumber = _uiState.value.editedStoreValues["deviceSerialNumber"] ?: storeRecord.deviceSerialNumber,
+            deviceOfficialName = _uiState.value.editedStoreValues["deviceOfficialName"] ?: storeRecord.deviceOfficialName,
+            deviceOfficialSerial = _uiState.value.editedStoreValues["deviceOfficialSerial"] ?: storeRecord.deviceOfficialSerial,
+            shelveNumber = _uiState.value.editedStoreValues["shelveNumber"] ?: storeRecord.shelveNumber,
+            rackNumber = _uiState.value.editedStoreValues["rackNumber"] ?: storeRecord.rackNumber,
+            storeNumber = _uiState.value.editedStoreValues["storeNumber"] ?: storeRecord.storeNumber,
+            deviceProject = _uiState.value.editedStoreValues["deviceProject"] ?: storeRecord.deviceProject,
+            deviceNotes = _uiState.value.editedStoreValues["deviceNotes"] ?: storeRecord.deviceNotes
+        )
+
+        viewModelScope.launch {
+            val success = repository.editDeviceInformation(updatedStoreRecord)
+            if (!success) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        userMessage = "${updatedStoreRecord.deviceName} / ${updatedStoreRecord.deviceSerialNumber} already exists",
+                        deviceEditExistTextExpand = true
+                    )
+                }
+            } else {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        userMessage = "Device information updated successfully",
+                        deviceEditExistTextExpand = false,
+                        editDialogExpand = false
+                    )
+                }
+                if(updatedStoreRecord.storeNumber.isNotBlank()){
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            currentSelectedStore = updatedStoreRecord.storeNumber
+                        )
+                    }
+                    getStoreData(_uiState.value.currentSelectedStore)
+                }
+                clearEditDialogFields()
+            }
+        }
+    }
+
+    fun changeEditErrorMessageExpand(expand:Boolean) {
+        _uiState.update { currentState ->
+            currentState.copy(deviceEditExistTextExpand = expand)
         }
     }
 
