@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +54,17 @@ fun EditDialog(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
+
+                if(storeUiState.deviceEditExistTextExpand){
+                    Text(
+                        text = storeUiState.userMessage,
+                        fontSize = 14.sp,
+                        color = Color.Red,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                }
+
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -62,10 +74,9 @@ fun EditDialog(
                     OutlinedTextField(
                         value = storeUiState.editedStoreValues["deviceName"] ?: storeRecord.deviceName,
                         onValueChange = {
-//                        viewModel.updateEditDialogField("deviceName", it)
+                        viewModel.updateEditDialogField("deviceName", it)
                                     },
-                        readOnly = true,
-                        enabled = false,
+
                         label = { Text("Device Name") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(6.dp)
@@ -76,8 +87,7 @@ fun EditDialog(
                         onValueChange = {
                             viewModel.updateEditDialogField("deviceSerialNumber", it)
                                     },
-                        readOnly = true,
-                        enabled = false,
+
                         label = { Text("Device Serial Number") },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(6.dp)
@@ -166,10 +176,22 @@ fun EditDialog(
                     
                     Button(
                         onClick = {
-                            viewModel.editDeviceInformation(storeRecord)
-                            viewModel.clearEditDialogFields()
-                            viewModel.changeEditDialogExpand(false)
-                            viewModel.getStoreData(storeUiState.currentSelectedStore)
+                            if (storeUiState.editedStoreValues["deviceName"] == ""||
+                                storeUiState.editedStoreValues["deviceSerialNumber"] == "") {
+                                viewModel.changeEditErrorMessageExpand(true)
+                                viewModel.updateUserMessage("Please fill in device name and serial number")
+                            } else {
+                                viewModel.changeEditErrorMessageExpand(false)
+                                viewModel.clearUserMessage()
+                                viewModel.editDeviceInformation(storeRecord)
+                            }
+
+
+
+//                            viewModel.editDeviceInformation(storeRecord)
+//                            viewModel.clearEditDialogFields()
+//                            viewModel.changeEditDialogExpand(false)
+//                            viewModel.getStoreData(storeUiState.currentSelectedStore)
 
                         },
                         shape = RoundedCornerShape(6.dp)

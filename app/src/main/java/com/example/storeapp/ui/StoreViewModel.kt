@@ -1,11 +1,14 @@
 package com.example.storeapp.ui
 
 import android.app.Application
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.storeapp.data.CameraState
 import com.example.storeapp.data.LoadingStatus
 import com.example.storeapp.data.StoreDatabase
 import com.example.storeapp.data.StoreEntity
@@ -14,17 +17,17 @@ import com.example.storeapp.data.TabType
 import com.example.storeapp.data.toStoreRecord
 import com.example.storeapp.model.MovementRecord
 import com.example.storeapp.model.StoreRecord
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import java.io.IOException
+import java.sql.Time
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
@@ -40,18 +43,15 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         storeListDao = storeDatabase.storeListDao(),
         userDao = storeDatabase.userDao())
 
-//    val allStores: StateFlow<List<StoreRecord>> = repository.allStores
-//        .stateIn(
-//            scope = viewModelScope,
-//            started = SharingStarted.WhileSubscribed(5000),
-//            initialValue = emptyList()
-//        )
+
 
     private val _uiState = MutableStateFlow(StoreUiState())
     val uiState: StateFlow<StoreUiState> = _uiState
 
+    private val _cameraState = MutableStateFlow(CameraState())
+    val cameraState: StateFlow<CameraState> = _cameraState
+
     init {
-//        getStoresList()
         getMovementList()
         getAllData()
     }
@@ -153,6 +153,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
     }
+
+    
 
     fun updateBorrowTextField(textFieldContent: String){
         _uiState.update {
@@ -420,27 +422,63 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     fun changeEditDialogExpand(status:Boolean){
         _uiState.update {
+
+
+
             it.copy(
                 editDialogExpand = status
             )
         }
     }
 
-    fun editDeviceInformation(storeRecord: StoreRecord){
-        viewModelScope.launch {
-            // Create updated StoreRecord from the edited values
-            val updatedStoreRecord = storeRecord.copy(
-                deviceOfficialName = _uiState.value.editedStoreValues["deviceOfficialName"] ?: storeRecord.deviceOfficialName,
-                deviceOfficialSerial = _uiState.value.editedStoreValues["deviceOfficialSerial"] ?: storeRecord.deviceOfficialSerial,
-                shelveNumber = _uiState.value.editedStoreValues["shelveNumber"] ?: storeRecord.shelveNumber,
-                rackNumber = _uiState.value.editedStoreValues["rackNumber"] ?: storeRecord.rackNumber,
-                storeNumber = _uiState.value.editedStoreValues["storeNumber"] ?: storeRecord.storeNumber,
-                deviceProject = _uiState.value.editedStoreValues["deviceProject"] ?: storeRecord.deviceProject,
-                deviceNotes = _uiState.value.editedStoreValues["deviceNotes"] ?: storeRecord.deviceNotes
-            )
-            
-            repository.editDeviceInformation(updatedStoreRecord)
 
+
+    fun editDeviceInformation(storeRecord: StoreRecord){
+        val updatedStoreRecord = storeRecord.copy(
+            deviceName = _uiState.value.editedStoreValues["deviceName"] ?: storeRecord.deviceName,
+            deviceSerialNumber = _uiState.value.editedStoreValues["deviceSerialNumber"] ?: storeRecord.deviceSerialNumber,
+            deviceOfficialName = _uiState.value.editedStoreValues["deviceOfficialName"] ?: storeRecord.deviceOfficialName,
+            deviceOfficialSerial = _uiState.value.editedStoreValues["deviceOfficialSerial"] ?: storeRecord.deviceOfficialSerial,
+            shelveNumber = _uiState.value.editedStoreValues["shelveNumber"] ?: storeRecord.shelveNumber,
+            rackNumber = _uiState.value.editedStoreValues["rackNumber"] ?: storeRecord.rackNumber,
+            storeNumber = _uiState.value.editedStoreValues["storeNumber"] ?: storeRecord.storeNumber,
+            deviceProject = _uiState.value.editedStoreValues["deviceProject"] ?: storeRecord.deviceProject,
+            deviceNotes = _uiState.value.editedStoreValues["deviceNotes"] ?: storeRecord.deviceNotes
+        )
+
+        viewModelScope.launch {
+            val success = repository.editDeviceInformation(updatedStoreRecord)
+            if (!success) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        userMessage = "${updatedStoreRecord.deviceName} / ${updatedStoreRecord.deviceSerialNumber} already exists",
+                        deviceEditExistTextExpand = true
+                    )
+                }
+            } else {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        userMessage = "Device information updated successfully",
+                        deviceEditExistTextExpand = false,
+                        editDialogExpand = false
+                    )
+                }
+                if(updatedStoreRecord.storeNumber.isNotBlank()){
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            currentSelectedStore = updatedStoreRecord.storeNumber
+                        )
+                    }
+                    getStoreData(_uiState.value.currentSelectedStore)
+                }
+                clearEditDialogFields()
+            }
+        }
+    }
+
+    fun changeEditErrorMessageExpand(expand:Boolean) {
+        _uiState.update { currentState ->
+            currentState.copy(deviceEditExistTextExpand = expand)
         }
     }
 
@@ -547,6 +585,94 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     fun changeErrorMessageExpand(expand:Boolean) {
         _uiState.update { currentState ->
             currentState.copy(deviceExistTextExpand = expand)
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /////////////////////////////!!!!!!!!!!!!!!!!!!!!  <-----Camera----> !!!!!!!!!!!!!!!!!!!!/////////////////////////////////////////////////////////////////
+    fun onCameraPermissionResult(granted: Boolean) {
+        _cameraState.update { it.copy(hasPermission = granted) }
+    }
+
+    fun prepareImageCapture(context: Context, storeId: String) {
+        val file = File(context.cacheDir, "temp_image_${Date()}.jpg")
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            file
+        )
+        _cameraState.update {
+            it.copy(
+                imageUri = uri,
+                currentDeviceName = storeId
+            )
+        }
+    }
+
+    fun onImageCaptured(success: Boolean) {
+        if (success) {
+            viewModelScope.launch {
+                try {
+                    _cameraState.value.imageUri?.let { uri ->
+                        // Update the image in the database
+                        updateStoreImage(_cameraState.value.currentDeviceName, uri.toString())
+                        
+                        // Force a delay to ensure database update is complete
+//                    Log.i("SaveImageBefore",_uiState.value.data.first().toString())
+                        // Force refresh the store data
+                        getStoreData(_uiState.value.currentSelectedStore)
+//                        Log.i("SaveImageAfter",_uiState.value.data.first().toString())
+
+                        // Update UI state to trigger recomposition
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                userMessage = "Image updated successfully"
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("StoreViewModel", "Error handling captured image: ${e.message}")
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            userMessage = "Failed to update image: ${e.message}"
+                        )
+                    }
+                } finally {
+                    // Reset camera state
+                    _cameraState.update { 
+                        it.copy(
+                            imageUri = null,
+                            currentDeviceName = ""
+                        )
+                    }
+                }
+            }
+        } else {
+            // Reset camera state if capture failed
+            _cameraState.update { 
+                it.copy(
+                    imageUri = null,
+                    currentDeviceName = ""
+                )
+            }
+            _uiState.update { currentState ->
+                currentState.copy(
+                    userMessage = "Failed to capture image"
+                )
+            }
+        }
+    }
+
+
+    fun updateStoreImage(storeId: String, imageUri: String) {
+        viewModelScope.launch {
+            try {
+                repository.updateStoreImage(storeId, imageUri)
+            } catch (e: IOException) {
+                Log.e("StoreViewModel", "Error updating store image: ${e.message}")
+            }
         }
     }
 

@@ -62,6 +62,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.runner)
+    implementation(libs.androidx.espresso.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -80,5 +82,16 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+
+
+    // For camera
+    implementation("androidx.camera:camera-camera2:1.4.1")
+
+    implementation("androidx.camera:camera-lifecycle:1.4.1")
+
+    implementation("androidx.camera:camera-view:1.4.1")
+
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
 }

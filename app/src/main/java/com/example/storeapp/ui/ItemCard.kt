@@ -1,5 +1,13 @@
 package com.example.storeapp.ui
 
+import android.annotation.SuppressLint
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
+import androidx.camera.view.PreviewView
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.Image
@@ -31,7 +39,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.storeapp.R
+
 import com.example.storeapp.model.StoreRecord
 import com.example.storeapp.ui.theme.StoreAppTheme
 import com.example.storeapp.ui.theme.onErrorLight
@@ -40,8 +50,19 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.example.storeapp.model.MovementRecord
+import java.io.File
+import android.Manifest
+import android.content.pm.PackageManager
+import coil.request.ImageRequest
 
+@SuppressLint("RememberReturnType", "SuspiciousIndentation")
 @Composable
 fun ItemCard(
     viewModel: StoreViewModel,
@@ -60,7 +81,6 @@ fun ItemCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         onClick = {exapand = !exapand}
     ) {
-
         Column {
             Row(
                 modifier = Modifier
@@ -74,13 +94,69 @@ fun ItemCard(
                         .size(95.dp)
                         .clip(RoundedCornerShape(6.dp))
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_launcher_background),
-                        contentDescription = null,
-                        alignment = Alignment.Center,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    val context = LocalContext.current
+                    
+                    val cameraLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.TakePicture()
+                    ) { success ->
+                        viewModel.onImageCaptured(success)
+                    }
+
+                    val permissionLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestPermission()
+                    ) { isGranted ->
+                        viewModel.onCameraPermissionResult(isGranted)
+                        if (isGranted) {
+                            viewModel.prepareImageCapture(context, storeRecord.id)
+                            viewModel.cameraState.value.imageUri?.let { uri ->
+                                cameraLauncher.launch(uri)
+                            }
+                        }
+                    }
+
+                    Button(
+                        onClick = {
+                            when (PackageManager.PERMISSION_GRANTED) {
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.CAMERA
+                                ) -> {
+                                    viewModel.prepareImageCapture(context, storeRecord.deviceName)
+                                    viewModel.cameraState.value.imageUri?.let { uri ->
+                                        cameraLauncher.launch(uri)
+
+                                    }
+                                }
+                                else -> {
+                                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                                }
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(6.dp)),
+                        shape = RoundedCornerShape(6.dp),
+                    ) {
+                        if (storeRecord.deviceImageStatus.isNotEmpty()) {
+                            val imageUri = Uri.parse(storeRecord.deviceImageStatus)
+
+                                Box(modifier = Modifier.fillMaxSize()){
+                                AsyncImage(
+                                    model = imageUri,
+                                    contentDescription = "Device Image",
+                                    modifier = Modifier.fillMaxSize().sizeIn(100.dp),
+                                    contentScale = ContentScale.Crop,
+
+                                )}
+
+                        } else {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_launcher_background),
+                                contentDescription = "Take Picture",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
                 }
 
                 Column(
@@ -153,6 +229,7 @@ fun ItemCard(
 
     }
 }
+
 
 @Composable
 fun ItemCardDetail(
@@ -249,5 +326,3 @@ fun ItemCardDetail(
 
 
 }
-
-
